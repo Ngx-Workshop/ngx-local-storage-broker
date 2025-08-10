@@ -6,9 +6,9 @@
     "start": "ng serve",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "build:lib": "ng build ngx-local-storage-broker",
-    "build:broker": "esbuild broker/broker.ts --bundle --sourcemap --platform=browser --format=esm --outfile=dist/broker/ngx-local-storage-broker.js",
-    "copy:broker:html": "mkdir -p dist/broker && cp broker/index.html dist/broker/ngx-local-storage-broker.html",
+    "build:lib": "ng build ngx-local-storage-client",
+    "build:broker": "esbuild ngx-broker/broker.ts --bundle --sourcemap --platform=browser --format=esm --outfile=dist/ngx-broker/ngx-local-storage-broker.js",
+    "copy:broker:html": "mkdir -p dist/ngx-broker && cp ngx-broker/index.html dist/ngx-broker/ngx-local-storage-broker.html",
     "build": "npm run build:lib && npm run build:broker && npm run copy:broker:html"
   },
   "private": true,
