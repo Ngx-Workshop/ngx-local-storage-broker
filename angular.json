@@ -3,5 +3,34 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
+    "ngx-local-storage-client": {
+      "projectType": "library",
+      "root": "projects/ngx-local-storage-client",
+      "sourceRoot": "projects/ngx-local-storage-client/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngx-local-storage-client/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ngx-local-storage-client/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/ngx-local-storage-client/tsconfig.spec.json"
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "194cfca4-a256-4536-ab66-bc73152d9b67"
   }
 }
