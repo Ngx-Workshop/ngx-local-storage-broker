@@ -29,7 +29,8 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: 'dist/ngx-broker/*'
-          target: '/opt/ngx-workshop-assets/'
+          target: '/opt/ngx-workshop-assets/ngx-broker'
+          strip_components: 2
 
       - name: Reload Nginx (optional)
         uses: appleboy/ssh-action@master
