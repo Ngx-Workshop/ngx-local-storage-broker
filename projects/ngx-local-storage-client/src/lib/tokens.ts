@@ -12,9 +12,12 @@ export interface LocalStorageBrokerConfig {
 }
 
 export const LOCAL_STORAGE_BROKER_CONFIG =
-  new InjectionToken<LocalStorageBrokerConfig>('LOCAL_STORAGE_BROKER_CONFIG');
+  new InjectionToken<LocalStorageBrokerConfig>(
+    'LOCAL_STORAGE_BROKER_CONFIG'
+  );
 
-export function provideLocalStorageBroker(config: LocalStorageBrokerConfig) {
+export function provideLocalStorageBroker(
+  config: LocalStorageBrokerConfig
+) {
   return [{ provide: LOCAL_STORAGE_BROKER_CONFIG, useValue: config }];
 }
-

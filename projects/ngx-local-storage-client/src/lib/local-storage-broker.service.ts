@@ -18,11 +18,16 @@ export class LocalStorageBrokerService {
   private idSeq = 0;
   private pending = new Map<
     string,
-    { resolve: (v: unknown) => void; reject: (e: unknown) => void; timeoutId: any }
+    {
+      resolve: (v: unknown) => void;
+      reject: (e: unknown) => void;
+      timeoutId: any;
+    }
   >();
 
   constructor(
-    @Inject(LOCAL_STORAGE_BROKER_CONFIG) private cfg: LocalStorageBrokerConfig,
+    @Inject(LOCAL_STORAGE_BROKER_CONFIG)
+    private cfg: LocalStorageBrokerConfig,
     @Inject(DOCUMENT) private doc: Document,
     private zone: NgZone
   ) {
@@ -59,7 +64,8 @@ export class LocalStorageBrokerService {
 
       // Failsafe: if iframe can't load at all
       setTimeout(() => {
-        if (!this.iframeWindow) reject(new Error('Broker iframe did not load'));
+        if (!this.iframeWindow)
+          reject(new Error('Broker iframe did not load'));
       }, 3000);
     });
 
@@ -88,7 +94,9 @@ export class LocalStorageBrokerService {
       if (msg['success']) {
         entry.resolve(msg['value']);
       } else {
-        entry.reject(new Error(String(msg['error'] ?? 'unknown error')));
+        entry.reject(
+          new Error(String(msg['error'] ?? 'unknown error'))
+        );
       }
     }
   };
@@ -98,7 +106,10 @@ export class LocalStorageBrokerService {
     this.iframeWindow.postMessage(payload, this.cfg.brokerOrigin);
   }
 
-  private async request<T>(action: 'get'|'set'|'remove'|'clear'|'keys', body: Record<string, unknown> = {}): Promise<T> {
+  private async request<T>(
+    action: 'get' | 'set' | 'remove' | 'clear' | 'keys',
+    body: Record<string, unknown> = {}
+  ): Promise<T> {
     await this.ensureIframe();
 
     const id = String(++this.idSeq);
@@ -118,7 +129,11 @@ export class LocalStorageBrokerService {
         reject(new Error(`Broker request timed out: ${action}`));
       }, timeoutMs);
 
-      this.pending.set(id, { resolve, reject, timeoutId });
+      this.pending.set(id, {
+        resolve: resolve as (v: unknown) => void,
+        reject: reject as (e: unknown) => void,
+        timeoutId,
+      });
       this.postRaw(msg);
     });
   }
@@ -140,4 +155,3 @@ export class LocalStorageBrokerService {
     return this.request('keys', {});
   }
 }
-
