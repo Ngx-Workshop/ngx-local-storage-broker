@@ -28,7 +28,7 @@ jobs:
           host: ${{ secrets.DROPLET_IP }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: 'dist/broker/*'
+          source: 'dist/ngx-broker/*'
           target: '/opt/ngx-workshop-assets/'
 
       - name: Reload Nginx (optional)
