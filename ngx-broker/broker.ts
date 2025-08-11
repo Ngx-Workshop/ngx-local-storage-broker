@@ -58,10 +58,8 @@ try {
 }
 
 window.addEventListener('message', (event: MessageEvent) => {
-  console.log('1');
   if (!event.data || typeof event.data !== 'object') return;
   const data = event.data as RequestMsg;
-  console.log('2');
   // Security: only accept messages from allowed parents
   // TEMP DEBUG
   // This shows you exactly what to whitelist and whether the channel matches.
@@ -75,8 +73,8 @@ window.addEventListener('message', (event: MessageEvent) => {
     });
   }
 
-  console.log('3');
   if (data.kind === 'ping') {
+    console.log('[broker] ping received from', event.origin);
     reply(event, {
       channel: CHANNEL,
       kind: 'pong',
@@ -85,9 +83,11 @@ window.addEventListener('message', (event: MessageEvent) => {
     return;
   }
 
-  console.log('4');
   if (data.kind === 'request') {
-    console.log(`Broker received request from ${event.origin}`, data);
+    console.log(
+      `[broker] received request from ${event.origin}`,
+      data
+    );
     const { id, action, key, value, namespace } = data;
 
     try {
