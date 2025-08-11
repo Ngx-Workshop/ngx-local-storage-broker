@@ -58,9 +58,7 @@ try {
 window.addEventListener('message', (event: MessageEvent) => {
   if (!event.data || typeof event.data !== 'object') return;
   const data = event.data as RequestMsg;
-  // Security: only accept messages from allowed parents
-  // TEMP DEBUG
-  // This shows you exactly what to whitelist and whether the channel matches.
+
   if (
     !ALLOWED_PARENT_ORIGINS.has(event.origin) ||
     (data as any).channel !== CHANNEL
@@ -102,9 +100,6 @@ window.addEventListener('message', (event: MessageEvent) => {
         }
         case 'set': {
           if (!key) throw new Error('Missing key');
-          console.log(
-            `[broker] setting key "${key}" with value "${value}" in namespace "${namespace}"`
-          );
           localStorage.setItem(
             namespacedKey(key, namespace),
             value ?? ''
