@@ -61,7 +61,6 @@ window.addEventListener('message', (event: MessageEvent) => {
   if (!event.data || typeof event.data !== 'object') return;
   const data = event.data as RequestMsg;
 
-  console.log(`Broker received message from ${event.origin}`, data);
   // Security: only accept messages from allowed parents
   if (!ALLOWED_PARENT_ORIGINS.has(event.origin)) return;
   if (data.channel !== CHANNEL) return;
@@ -76,6 +75,7 @@ window.addEventListener('message', (event: MessageEvent) => {
   }
 
   if (data.kind === 'request') {
+    console.log(`Broker received request from ${event.origin}`, data);
     const { id, action, key, value, namespace } = data;
 
     try {
