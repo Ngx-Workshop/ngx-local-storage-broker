@@ -5,6 +5,7 @@ const VERSION = '1.0.0';
 // Edit to match your environments:
 const ALLOWED_PARENT_ORIGINS = new Set<string>([
   'http://localhost:4200', // shell local
+  'http://localhost', // shell local
   'http://localhost:4201', // remote local
   'http://localhost:4202', // extra local
   'https://proxy.ngx-workshop.io',
@@ -66,12 +67,8 @@ window.addEventListener('message', (event: MessageEvent) => {
   if (
     !ALLOWED_PARENT_ORIGINS.has(event.origin) ||
     (data as any).channel !== CHANNEL
-  ) {
-    console.warn('[broker] rejected message', {
-      origin: event.origin,
-      channel: (data as any).channel,
-    });
-  }
+  )
+    return;
 
   if (data.kind === 'ping') {
     console.log('[broker] ping received from', event.origin);
