@@ -74,8 +74,8 @@ window.addEventListener('message', (event: MessageEvent) => {
     return;
   }
 
+  console.log(`Broker received request from ${event.origin}`, data);
   if (data.kind === 'request') {
-    console.log(`Broker received request from ${event.origin}`, data);
     const { id, action, key, value, namespace } = data;
 
     try {
