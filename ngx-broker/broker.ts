@@ -63,8 +63,17 @@ window.addEventListener('message', (event: MessageEvent) => {
   const data = event.data as RequestMsg;
   console.log('2');
   // Security: only accept messages from allowed parents
-  if (!ALLOWED_PARENT_ORIGINS.has(event.origin)) return;
-  if (data.channel !== CHANNEL) return;
+  // TEMP DEBUG
+  // This shows you exactly what to whitelist and whether the channel matches.
+  if (
+    !ALLOWED_PARENT_ORIGINS.has(event.origin) ||
+    (data as any).channel !== CHANNEL
+  ) {
+    console.warn('[broker] rejected message', {
+      origin: event.origin,
+      channel: (data as any).channel,
+    });
+  }
 
   console.log('3');
   if (data.kind === 'ping') {
