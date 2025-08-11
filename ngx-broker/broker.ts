@@ -4,10 +4,7 @@ const VERSION = '1.0.0';
 
 // Edit to match your environments:
 const ALLOWED_PARENT_ORIGINS = new Set<string>([
-  'http://localhost:4200', // shell local
-  'http://localhost', // shell local
-  'http://localhost:4201', // remote local
-  'http://localhost:4202', // extra local
+  'http://localhost', // ! IMPORTANT: do not use in production
   'https://proxy.ngx-workshop.io',
   'https://mfe-orchestrator.ngx-workshop.io',
   // add any other subdomains that will embed this iframe
@@ -105,6 +102,9 @@ window.addEventListener('message', (event: MessageEvent) => {
         }
         case 'set': {
           if (!key) throw new Error('Missing key');
+          console.log(
+            `[broker] setting key "${key}" with value "${value}" in namespace "${namespace}"`
+          );
           localStorage.setItem(
             namespacedKey(key, namespace),
             value ?? ''
