@@ -5,7 +5,6 @@ const VERSION = '1.0.0';
 // Edit to match your environments:
 const ALLOWED_PARENT_ORIGINS = new Set<string>([
   'http://localhost', // ! IMPORTANT: do not use in production
-  'https://proxy.ngx-workshop.io',
   'https://beta.ngx-workshop.io',
   'https://mfe-orchestrator.ngx-workshop.io',
   // add any other subdomains that will embed this iframe
