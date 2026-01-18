@@ -12,6 +12,7 @@
     "build": "npm run build:lib && npm run build:broker && npm run copy:broker:html"
   },
   "private": true,
+  "packageManager": "npm@11.6.0",
   "dependencies": {
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
