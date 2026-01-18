@@ -1,4 +1,4 @@
-name: Publish ngx-navigational-list
+name: Publish ngx-local-storage-client
 
 on:
   push:
@@ -36,21 +36,21 @@ jobs:
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
-          const path = 'projects/ngx-navigational-list/package.json';
+          const path = 'projects/ngx-local-storage-client/package.json';
           const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
           const version = String(pkg.version ?? '0.0.0').split('.');
           const [major = '0', minor = '0'] = version;
           const patch = process.env.GITHUB_RUN_NUMBER ?? '0';
           pkg.version = `${major}.${minor}.${patch}`;
           fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
-          console.log(`Publishing ngx-navigational-list version ${pkg.version}`);
+          console.log(`Publishing ngx-local-storage-client version ${pkg.version}`);
           NODE
 
       - name: Build Angular library
-        run: npm run ngx-navigational-list:build
+        run: npm run ngx-local-storage-client:build
 
       - name: Publish package to npm
-        working-directory: dist/ngx-navigational-list
+        working-directory: dist/ngx-local-storage-client
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
