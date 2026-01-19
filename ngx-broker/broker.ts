@@ -7,6 +7,7 @@ const ALLOWED_PARENT_ORIGINS = new Set<string>([
   'http://localhost', // ! IMPORTANT: do not use in production
   'https://beta.ngx-workshop.io',
   'https://admin.ngx-workshop.io',
+  'https://auth.ngx-workshop.io',
   // add any other subdomains that will embed this iframe
 ]);
 
