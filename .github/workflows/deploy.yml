@@ -114,12 +114,12 @@ jobs:
         env:
           MFE_DROPLET_IP: ${{ secrets.MFE_DROPLET_IP }}
           MFE_SSH_PRIVATE_KEY: ${{ secrets.MFE_SSH_PRIVATE_KEY }}
-          SSH_HOST_FINGERPRINT: ${{ secrets.SSH_HOST_FINGERPRINT }}
+          MFE_SSH_HOST_FINGERPRINT: ${{ secrets.MFE_SSH_HOST_FINGERPRINT }}
         run: |
           test -n "$MFE_DROPLET_IP" || { echo "Missing MFE_DROPLET_IP" >&2; exit 1; }
           test -n "$MFE_SSH_PRIVATE_KEY" || { echo "Missing MFE_SSH_PRIVATE_KEY" >&2; exit 1; }
-          if [[ ! "$SSH_HOST_FINGERPRINT" =~ ^SHA256:[A-Za-z0-9+/]{43}$ ]]; then
-            echo "SSH_HOST_FINGERPRINT must contain only the frontend host's SHA256 fingerprint" >&2
+          if [[ ! "$MFE_SSH_HOST_FINGERPRINT" =~ ^SHA256:[A-Za-z0-9+/]{43}$ ]]; then
+            echo "MFE_SSH_HOST_FINGERPRINT must contain only the frontend host's SHA256 fingerprint" >&2
             exit 1
           fi
 
@@ -136,7 +136,7 @@ jobs:
           host: ${{ secrets.MFE_DROPLET_IP }}
           username: root
           key: ${{ secrets.MFE_SSH_PRIVATE_KEY }}
-          fingerprint: ${{ secrets.SSH_HOST_FINGERPRINT }}
+          fingerprint: ${{ secrets.MFE_SSH_HOST_FINGERPRINT }}
           source: 'dist/ngx-broker/*'
           target: '/opt/ngx-workshop-assets/ngx-broker'
           strip_components: 2
