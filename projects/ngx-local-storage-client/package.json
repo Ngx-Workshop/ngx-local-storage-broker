@@ -8,5 +8,10 @@
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ngx-Workshop/ngx-local-storage-broker.git",
+    "directory": "projects/ngx-local-storage-client"
+  }
 }

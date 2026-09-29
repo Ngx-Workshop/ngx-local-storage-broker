@@ -2,92 +2,134 @@ name: Deploy LocalStorage Broker to DO Droplet & Publish ngx-local-storage-clien
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ngx-local-storage-broker-production
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Use npm 11.6.0
-        run: npm install -g npm@11.6.0
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Build lib + broker
-        run: npm run build
-
-      - name: Copy broker files to Droplet
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.DROPLET_IP }}
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: 'dist/ngx-broker/*'
-          target: '/opt/ngx-workshop-assets/ngx-broker'
-          strip_components: 2
-
-      - name: Reload Nginx (optional)
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.DROPLET_IP }}
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            systemctl reload nginx || true
   publish:
-    name: Build and Publish
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
+      id-token: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org
-          cache: npm
-          always-auth: true
+          persist-credentials: false
 
-      - name: Use npm 11.6.0
-        run: npm install -g npm@11.6.0
+      - name: Setup Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          check-latest: true
+          package-manager-cache: false
+
+      - name: Install publishing CLI
+        run: |
+          node - <<'NODE'
+          const [major, minor, patch] = process.versions.node.split('.').map(Number);
+          if (major !== 22 || minor < 22 || (minor === 22 && patch < 2)) {
+            throw new Error('npm 12.1.0 requires Node 22.22.2 or newer on Node 22');
+          }
+          NODE
+          npm install --global npm@12.1.0
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Stamp library version with build number
-        env:
-          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+      - name: Set deterministic library version
+        working-directory: projects/ngx-local-storage-client
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
-          const path = 'projects/ngx-local-storage-client/package.json';
+          const path = './package.json';
           const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
-          const version = String(pkg.version ?? '0.0.0').split('.');
-          const [major = '0', minor = '0'] = version;
-          const patch = process.env.GITHUB_RUN_NUMBER ?? '0';
+
+          if (pkg.name !== '@tmdjr/ngx-local-storage-client') {
+            throw new Error('Unexpected library package');
+          }
+
+          const [major, minor] = String(pkg.version).split('.');
+          const patch = process.env.GITHUB_RUN_NUMBER;
+          if (!/^\d+$/.test(patch || '')) {
+            throw new Error('Missing valid GitHub run number');
+          }
+
           pkg.version = `${major}.${minor}.${patch}`;
           fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
-          console.log(`Publishing ngx-local-storage-client version ${pkg.version}`);
+          console.log('Publishing', pkg.name, pkg.version);
           NODE
 
       - name: Build Angular library
         run: npm run ngx-local-storage-client:build
 
-      - name: Publish package to npm
+      - name: Publish library using OIDC
         working-directory: dist/ngx-local-storage-client
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org
         run: npm publish --access public
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          check-latest: true
+          package-manager-cache: false
+
+      - name: Install publishing CLI
+        run: |
+          node - <<'NODE'
+          const [major, minor, patch] = process.versions.node.split('.').map(Number);
+          if (major !== 22 || minor < 22 || (minor === 22 && patch < 2)) {
+            throw new Error('npm 12.1.0 requires Node 22.22.2 or newer on Node 22');
+          }
+          NODE
+          npm install --global npm@12.1.0
+
+      - name: Validate frontend host fingerprint
+        env:
+          SSH_HOST_FINGERPRINT: ${{ secrets.SSH_HOST_FINGERPRINT }}
+        run: test -n "$SSH_HOST_FINGERPRINT"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build library and broker
+        run: npm run build
+
+      - name: Copy broker files to Droplet
+        uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
+        with:
+          version: '1.8.0'
+          host: ${{ secrets.DROPLET_IP }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          fingerprint: ${{ secrets.SSH_HOST_FINGERPRINT }}
+          source: 'dist/ngx-broker/*'
+          target: '/opt/ngx-workshop-assets/ngx-broker'
+          strip_components: 2
+          overwrite: true
